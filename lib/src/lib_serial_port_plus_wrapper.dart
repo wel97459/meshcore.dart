@@ -89,4 +89,8 @@ class LibSerialPortPlusWrapper implements SerialPortWrapper {
 
   @override
   bool get isOpen => _isOpen;
+
+  static List<String> listAvailablePorts() {
+    return SerialPort.getAvailablePorts();
+  }
 }
