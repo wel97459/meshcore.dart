@@ -1,7 +1,7 @@
 /// MeshCore Dart Library
 ///
 /// A Dart port of the MeshCore.js library for interacting with MeshCore devices.
-library meshcore;
+library meshcore_dart;
 
 // Core entities
 export 'src/packet.dart';
