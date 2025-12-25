@@ -1,6 +1,7 @@
 name: meshcore_dart
 description: A Dart library for controlling MeshCore devices.
 version: 0.1.0
+repository: https://github.com/wel97459/meshcore.dart
 
 environment:
   sdk: ^3.0.0
