@@ -1,4 +1,4 @@
-## 0.1.4
+## 0.1.5
 - Added universal_ble conntion interface.
 
 ## 0.1.3
