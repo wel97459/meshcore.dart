@@ -31,33 +31,42 @@ class BleConnection extends Connection
 
   @override
   Future<void> connect() async {
-    await ble.connect(deviceId);
-    
-    // Discover services
-    final services = await ble.discoverServices(deviceId);
-    
-    // Find the MeshCore service
-    final meshService = services.firstWhere(
-      (s) => s.uuid.toLowerCase() == BleUuids.serviceUuid.toLowerCase(),
-      orElse: () => throw Exception('MeshCore service not found'),
-    );
+    try {
+      final paired = await ble.isPaired(deviceId);
+      if (!paired) {
+        await ble.pair(deviceId);
+      }
+      await ble.connect(deviceId);
+      
+      // Discover services
+      final services = await ble.discoverServices(deviceId);
+      
+      // Find the MeshCore service
+      final meshService = services.firstWhere(
+        (s) => s.uuid.toLowerCase() == BleUuids.serviceUuid.toLowerCase(),
+        orElse: () => throw Exception('MeshCore service not found'),
+      );
 
-    // Find characteristics
-    final characteristics = meshService.characteristics;
+      // Find characteristics
+      final characteristics = meshService.characteristics;
 
-    final txChar = characteristics.firstWhere(
-      (c) => c.uuid.toLowerCase() == BleUuids.characteristicUuidTx.toLowerCase(),
-      orElse: () => throw Exception('TX characteristic not found'),
-    );
+      final txChar = characteristics.firstWhere(
+        (c) => c.uuid.toLowerCase() == BleUuids.characteristicUuidTx.toLowerCase(),
+        orElse: () => throw Exception('TX characteristic not found'),
+      );
 
-    // Enable notifications on TX
-    await ble.subscribeNotifications(
-      deviceId,
-      meshService.uuid,
-      txChar.uuid,
-    );
+      // Enable notifications on TX
+      await ble.subscribeNotifications(
+        deviceId,
+        meshService.uuid,
+        txChar.uuid,
+      );
 
-    onConnected();
+      onConnected();
+    } catch (e) {
+      _instances.remove(deviceId);
+      rethrow;
+    }
   }
 
   @override

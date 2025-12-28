@@ -1,3 +1,6 @@
+## 0.1.6
+- Added pair to BLE
+
 ## 0.1.5
 - Added universal_ble conntion interface.
 

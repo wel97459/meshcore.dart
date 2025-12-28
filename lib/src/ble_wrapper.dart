@@ -22,6 +22,13 @@ class BleWrapper {
       UniversalBle.startScan(scanFilter: scanFilter);
   
   Future<void> stopScan() => UniversalBle.stopScan();
+
+  Future<void> pair(String deviceId) => UniversalBle.pair(deviceId);
+
+  Future<bool> isPaired(String deviceId) async {
+    final paired = await UniversalBle.isPaired(deviceId);
+    return paired ?? false;
+  }
   
   set onValueChange(OnValueChange? callback) => UniversalBle.onValueChange = callback;
   
