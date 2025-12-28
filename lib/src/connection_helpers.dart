@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'dart:typed_data';
 import 'connection.dart';
 import 'connection_commands.dart';
@@ -678,5 +679,129 @@ mixin ConnectionHelpers on Connection, ConnectionCommands, ConnectionResponses {
 
     await sendCommandSignStart();
     return await completer.future;
+  }
+
+  Future<void> setOtherParams(bool manualAddContacts) async {
+    final ok = waitForResponse(ResponseCodes.ok);
+    final err = waitForResponse(ResponseCodes.err);
+
+    await sendCommandSetOtherParams(manualAddContacts ? 1 : 0);
+
+    return await Future.any([
+      ok.then((_) => null),
+      err.then((_) => throw Exception('Failed to set other params')),
+    ]);
+  }
+
+  Future<void> setAutoAddContacts() async {
+    return await setOtherParams(false);
+  }
+
+  Future<void> setManualAddContacts() async {
+    return await setOtherParams(true);
+  }
+
+  Future<dynamic> tracePath(Uint8List path, {Duration extraTimeout = Duration.zero}) async {
+    final completer = Completer<dynamic>();
+    final tag = Random().nextInt(1 << 32); // 0 to 2^32 - 1
+
+    Timer? timeoutTimer;
+    void Function(dynamic)? onSent;
+    void Function(dynamic)? onTraceData;
+    void Function(dynamic)? onErr;
+
+    void cleanup() {
+      timeoutTimer?.cancel();
+      if (onSent != null) off(ResponseCodes.sent, onSent);
+      if (onTraceData != null) off(PushCodes.traceData, onTraceData);
+      if (onErr != null) off(ResponseCodes.err, onErr);
+    }
+
+    onSent = (response) {
+      off(ResponseCodes.err, onErr!);
+      
+      final estTimeout = Duration(milliseconds: response['estTimeout']) + extraTimeout;
+      timeoutTimer = Timer(estTimeout, () {
+        cleanup();
+        if (!completer.isCompleted) {
+          completer.completeError(TimeoutException('Trace timed out'));
+        }
+      });
+    };
+
+    onTraceData = (response) {
+      if (response['tag'] != tag) return; // Ignore if tag mismatch
+      
+      cleanup();
+      if (!completer.isCompleted) {
+        completer.complete(response);
+      }
+    };
+
+    onErr = (_) {
+      cleanup();
+      if (!completer.isCompleted) {
+        completer.completeError(Exception('Trace failed'));
+      }
+    };
+
+    on(ResponseCodes.sent, onSent);
+    on(PushCodes.traceData, onTraceData);
+    once(ResponseCodes.err, onErr);
+
+    try {
+      await sendCommandSendTracePath(tag, 0, path);
+    } catch (e) {
+      cleanup();
+      completer.completeError(e);
+    }
+
+    return await completer.future;
+  }
+
+  Future<dynamic> getNeighbours(Uint8List publicKey, {
+    int count = 10,
+    int offset = 0,
+    int orderBy = 0,
+    int pubKeyPrefixLength = 8,
+  }) async {
+    final bufferWriter = BufferWriter();
+    bufferWriter.writeByte(BinaryRequestTypes.getNeighbours);
+    bufferWriter.writeByte(0); // request_version=0
+    bufferWriter.writeByte(count);
+    bufferWriter.writeUInt16LE(offset);
+    bufferWriter.writeByte(orderBy);
+    bufferWriter.writeByte(pubKeyPrefixLength);
+    bufferWriter.writeUInt32LE(Random().nextInt(1 << 32)); // 4 bytes random blob
+
+    // send binary request
+    final responseData = await sendBinaryRequest(publicKey, bufferWriter.toBytes());
+    if (responseData == null) return null;
+
+    // parse response
+    final bufferReader = BufferReader(responseData);
+    final totalNeighboursCount = bufferReader.readUInt16LE();
+    final resultsCount = bufferReader.readUInt16LE();
+
+    // parse neighbours list
+    final neighbours = [];
+    for (var i = 0; i < resultsCount; i++) {
+      // read info
+      final publicKeyPrefix = bufferReader.readBytes(pubKeyPrefixLength);
+      final heardSecondsAgo = bufferReader.readUInt32LE();
+      final snr = bufferReader.readInt8() / 4;
+
+      // add to list
+      neighbours.add({
+        'publicKeyPrefix': publicKeyPrefix,
+        'heardSecondsAgo': heardSecondsAgo,
+        'snr': snr,
+      });
+    }
+
+    return {
+      'totalNeighboursCount': totalNeighboursCount,
+      'neighbours': neighbours,
+    };
   }
 }
