@@ -1,6 +1,6 @@
 name: meshcore_dart
 description: A Dart library for controlling MeshCore devices.
-version: 0.1.2
+version: 0.1.4
 repository: https://github.com/wel97459/meshcore.dart
 
 environment:
@@ -11,8 +11,7 @@ dependencies:
   flutter_libserialport: ^0.6.0
   libserialport: ^0.3.0+1
   libserialport_plus: ^0.0.12
-  # Add dependencies here
-  # path: ^1.9.0
+  universal_ble: ^1.0.0
 
 dev_dependencies:
   lints: ^2.0.0

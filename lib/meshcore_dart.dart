@@ -14,6 +14,7 @@ export 'src/serial_connection.dart';
 export 'src/serial_port_wrapper.dart';
 export 'src/lib_serial_port_wrapper.dart';
 export 'src/lib_serial_port_plus_wrapper.dart';
+export 'src/ble_connection.dart';
 
 // Utilities
 export 'src/buffer_reader.dart';
