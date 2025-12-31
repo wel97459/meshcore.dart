@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'event_emitter.dart';
 import 'buffer_reader.dart';
+import 'constants.dart';
 
 abstract class Connection extends EventEmitter {
   bool _isConnected = false;
@@ -14,12 +15,12 @@ abstract class Connection extends EventEmitter {
 
   void onConnected() {
     _isConnected = true;
-    emit('connected');
+    emit(EventNames.connected);
   }
 
   void onDisconnected() {
     _isConnected = false;
-    emit('disconnected');
+    emit(EventNames.disconnected);
   }
 
   Future<dynamic> waitForResponse(dynamic event, {Duration? timeout}) {
@@ -49,7 +50,7 @@ abstract class Connection extends EventEmitter {
   }
 
   void onFrameReceived(Uint8List frame) {
-    emit('rx', frame);
+    emit(EventNames.rx, frame);
 
     if (frame.isEmpty) return;
 

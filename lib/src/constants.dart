@@ -1,3 +1,46 @@
+class EventNames {
+  static const String connected = 'connected';
+  static const String disconnected = 'disconnected';
+  static const String rx = 'rx';
+  static const String tx = 'tx';
+
+  // Response Events
+  static const String ok = 'ok';
+  static const String err = 'err';
+  static const String contactsStart = 'contactsStart';
+  static const String contact = 'contact';
+  static const String endOfContacts = 'endOfContacts';
+  static const String selfInfo = 'selfInfo';
+  static const String sent = 'sent';
+  static const String contactMsgRecv = 'contactMsgRecv';
+  static const String channelMsgRecv = 'channelMsgRecv';
+  static const String currTime = 'currTime';
+  static const String noMoreMessages = 'noMoreMessages';
+  static const String exportContact = 'exportContact';
+  static const String batteryVoltage = 'batteryVoltage';
+  static const String deviceInfo = 'deviceInfo';
+  static const String privateKey = 'privateKey';
+  static const String disabled = 'disabled';
+  static const String channelInfo = 'channelInfo';
+  static const String signStart = 'signStart';
+  static const String signature = 'signature';
+
+  // Push Events
+  static const String advert = 'advert';
+  static const String pathUpdated = 'pathUpdated';
+  static const String sendConfirmed = 'sendConfirmed';
+  static const String msgWaiting = 'msgWaiting';
+  static const String rawData = 'rawData';
+  static const String loginSuccess = 'loginSuccess';
+  static const String loginFail = 'loginFail';
+  static const String statusResponse = 'statusResponse';
+  static const String logRxData = 'logRxData';
+  static const String traceData = 'traceData';
+  static const String newAdvert = 'newAdvert';
+  static const String telemetryResponse = 'telemetryResponse';
+  static const String binaryResponse = 'binaryResponse';
+}
+
 class SerialFrameTypes {
   static const int incoming = 0x3e; // ">"
   static const int outgoing = 0x3c; // "<"

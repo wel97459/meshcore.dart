@@ -12,14 +12,14 @@ import 'buffer_utils.dart';
 
 mixin ConnectionHelpers on Connection, ConnectionCommands, ConnectionResponses {
   Future<dynamic> getSelfInfo({Duration? timeout}) async {
-    final future = waitForResponse(ResponseCodes.selfInfo, timeout: timeout);
+    final future = waitForResponse(EventNames.selfInfo, timeout: timeout);
     await sendCommandAppStart();
     return await future;
   }
 
   Future<void> sendAdvert(int type) async {
-    final ok = waitForResponse(ResponseCodes.ok);
-    final err = waitForResponse(ResponseCodes.err);
+    final ok = waitForResponse(EventNames.ok);
+    final err = waitForResponse(EventNames.err);
 
     await sendCommandSendSelfAdvert(type);
 
@@ -38,8 +38,8 @@ mixin ConnectionHelpers on Connection, ConnectionCommands, ConnectionResponses {
   }
 
   Future<void> setAdvertName(String name) async {
-    final ok = waitForResponse(ResponseCodes.ok);
-    final err = waitForResponse(ResponseCodes.err);
+    final ok = waitForResponse(EventNames.ok);
+    final err = waitForResponse(EventNames.err);
 
     await sendCommandSetAdvertName(name);
 
@@ -50,8 +50,8 @@ mixin ConnectionHelpers on Connection, ConnectionCommands, ConnectionResponses {
   }
 
   Future<void> setAdvertLatLong(int latitude, int longitude) async {
-    final ok = waitForResponse(ResponseCodes.ok);
-    final err = waitForResponse(ResponseCodes.err);
+    final ok = waitForResponse(EventNames.ok);
+    final err = waitForResponse(EventNames.err);
 
     await sendCommandSetAdvertLatLon(latitude, longitude);
 
@@ -62,8 +62,8 @@ mixin ConnectionHelpers on Connection, ConnectionCommands, ConnectionResponses {
   }
 
   Future<void> setTxPower(int txPower) async {
-    final ok = waitForResponse(ResponseCodes.ok);
-    final err = waitForResponse(ResponseCodes.err);
+    final ok = waitForResponse(EventNames.ok);
+    final err = waitForResponse(EventNames.err);
 
     await sendCommandSetTxPower(txPower);
 
@@ -74,8 +74,8 @@ mixin ConnectionHelpers on Connection, ConnectionCommands, ConnectionResponses {
   }
 
   Future<void> setRadioParams(int radioFreq, int radioBw, int radioSf, int radioCr) async {
-    final ok = waitForResponse(ResponseCodes.ok);
-    final err = waitForResponse(ResponseCodes.err);
+    final ok = waitForResponse(EventNames.ok);
+    final err = waitForResponse(EventNames.err);
 
     await sendCommandSetRadioParams(radioFreq, radioBw, radioSf, radioCr);
 
@@ -93,17 +93,17 @@ mixin ConnectionHelpers on Connection, ConnectionCommands, ConnectionResponses {
       contacts.add(contact);
     }
 
-    on(ResponseCodes.contact, onContact);
+    on(EventNames.contact, onContact);
 
-    once(ResponseCodes.endOfContacts, (_) {
-      off(ResponseCodes.contact, onContact);
+    once(EventNames.endOfContacts, (_) {
+      off(EventNames.contact, onContact);
       completer.complete(contacts);
     });
 
     try {
       await sendCommandGetContacts();
     } catch (e) {
-      off(ResponseCodes.contact, onContact);
+      off(EventNames.contact, onContact);
       completer.completeError(e);
     }
 
@@ -133,8 +133,8 @@ mixin ConnectionHelpers on Connection, ConnectionCommands, ConnectionResponses {
   }
 
   Future<dynamic> sendTextMessage(Uint8List contactPublicKey, String text, {int? type}) async {
-    final sent = waitForResponse(ResponseCodes.sent);
-    final err = waitForResponse(ResponseCodes.err);
+    final sent = waitForResponse(EventNames.sent);
+    final err = waitForResponse(EventNames.err);
 
     final txtType = type ?? TxtTypes.plain;
     final attempt = 0;
@@ -149,8 +149,8 @@ mixin ConnectionHelpers on Connection, ConnectionCommands, ConnectionResponses {
   }
 
   Future<void> sendChannelTextMessage(int channelIdx, String text) async {
-    final ok = waitForResponse(ResponseCodes.ok);
-    final err = waitForResponse(ResponseCodes.err);
+    final ok = waitForResponse(EventNames.ok);
+    final err = waitForResponse(EventNames.err);
 
     final txtType = TxtTypes.plain;
     final senderTimestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
@@ -169,32 +169,32 @@ mixin ConnectionHelpers on Connection, ConnectionCommands, ConnectionResponses {
 
     l1 = (m) {
       if (!c.isCompleted) {
-        off(ResponseCodes.contactMsgRecv, l1);
-        off(ResponseCodes.channelMsgRecv, l2);
-        off(ResponseCodes.noMoreMessages, l3);
+        off(EventNames.contactMsgRecv, l1);
+        off(EventNames.channelMsgRecv, l2);
+        off(EventNames.noMoreMessages, l3);
         c.complete({'contactMessage': m});
       }
     };
     l2 = (m) {
       if (!c.isCompleted) {
-        off(ResponseCodes.contactMsgRecv, l1);
-        off(ResponseCodes.channelMsgRecv, l2);
-        off(ResponseCodes.noMoreMessages, l3);
+        off(EventNames.contactMsgRecv, l1);
+        off(EventNames.channelMsgRecv, l2);
+        off(EventNames.noMoreMessages, l3);
         c.complete({'channelMessage': m});
       }
     };
     l3 = (m) {
       if (!c.isCompleted) {
-        off(ResponseCodes.contactMsgRecv, l1);
-        off(ResponseCodes.channelMsgRecv, l2);
-        off(ResponseCodes.noMoreMessages, l3);
+        off(EventNames.contactMsgRecv, l1);
+        off(EventNames.channelMsgRecv, l2);
+        off(EventNames.noMoreMessages, l3);
         c.complete(null);
       }
     };
 
-    on(ResponseCodes.contactMsgRecv, l1);
-    on(ResponseCodes.channelMsgRecv, l2);
-    on(ResponseCodes.noMoreMessages, l3);
+    on(EventNames.contactMsgRecv, l1);
+    on(EventNames.channelMsgRecv, l2);
+    on(EventNames.noMoreMessages, l3);
 
     await sendCommandSyncNextMessage();
     return await c.future;
@@ -211,8 +211,8 @@ mixin ConnectionHelpers on Connection, ConnectionCommands, ConnectionResponses {
   }
 
   Future<dynamic> getDeviceTime() async {
-    final currTime = waitForResponse(ResponseCodes.currTime);
-    final err = waitForResponse(ResponseCodes.err);
+    final currTime = waitForResponse(EventNames.currTime);
+    final err = waitForResponse(EventNames.err);
 
     await sendCommandGetDeviceTime();
 
@@ -223,8 +223,8 @@ mixin ConnectionHelpers on Connection, ConnectionCommands, ConnectionResponses {
   }
 
   Future<dynamic> setDeviceTime(int epochSecs) async {
-    final ok = waitForResponse(ResponseCodes.ok);
-    final err = waitForResponse(ResponseCodes.err);
+    final ok = waitForResponse(EventNames.ok);
+    final err = waitForResponse(EventNames.err);
 
     await sendCommandSetDeviceTime(epochSecs);
 
@@ -239,8 +239,8 @@ mixin ConnectionHelpers on Connection, ConnectionCommands, ConnectionResponses {
   }
 
   Future<dynamic> importContact(Uint8List advertPacketBytes) async {
-    final ok = waitForResponse(ResponseCodes.ok);
-    final err = waitForResponse(ResponseCodes.err);
+    final ok = waitForResponse(EventNames.ok);
+    final err = waitForResponse(EventNames.err);
 
     await sendCommandImportContact(advertPacketBytes);
 
@@ -251,8 +251,8 @@ mixin ConnectionHelpers on Connection, ConnectionCommands, ConnectionResponses {
   }
 
   Future<dynamic> exportContact([Uint8List? pubKey]) async {
-    final exportContactResp = waitForResponse(ResponseCodes.exportContact);
-    final err = waitForResponse(ResponseCodes.err);
+    final exportContactResp = waitForResponse(EventNames.exportContact);
+    final err = waitForResponse(EventNames.err);
 
     await sendCommandExportContact(pubKey);
 
@@ -263,8 +263,8 @@ mixin ConnectionHelpers on Connection, ConnectionCommands, ConnectionResponses {
   }
 
   Future<dynamic> shareContact(Uint8List pubKey) async {
-    final ok = waitForResponse(ResponseCodes.ok);
-    final err = waitForResponse(ResponseCodes.err);
+    final ok = waitForResponse(EventNames.ok);
+    final err = waitForResponse(EventNames.err);
 
     await sendCommandShareContact(pubKey);
 
@@ -275,8 +275,8 @@ mixin ConnectionHelpers on Connection, ConnectionCommands, ConnectionResponses {
   }
 
   Future<void> removeContact(Uint8List pubKey) async {
-    final ok = waitForResponse(ResponseCodes.ok);
-    final err = waitForResponse(ResponseCodes.err);
+    final ok = waitForResponse(EventNames.ok);
+    final err = waitForResponse(EventNames.err);
 
     await sendCommandRemoveContact(pubKey);
 
@@ -287,8 +287,8 @@ mixin ConnectionHelpers on Connection, ConnectionCommands, ConnectionResponses {
   }
 
   Future<void> addOrUpdateContact(Uint8List publicKey, int type, int flags, int outPathLen, Uint8List outPath, String advName, int lastAdvert, int advLat, int advLon) async {
-    final ok = waitForResponse(ResponseCodes.ok);
-    final err = waitForResponse(ResponseCodes.err);
+    final ok = waitForResponse(EventNames.ok);
+    final err = waitForResponse(EventNames.err);
 
     await sendCommandAddUpdateContact(publicKey, type, flags, outPathLen, outPath, advName, lastAdvert, advLat, advLon);
 
@@ -323,8 +323,8 @@ mixin ConnectionHelpers on Connection, ConnectionCommands, ConnectionResponses {
   }
 
   Future<void> resetPath(Uint8List pubKey) async {
-    final ok = waitForResponse(ResponseCodes.ok);
-    final err = waitForResponse(ResponseCodes.err);
+    final ok = waitForResponse(EventNames.ok);
+    final err = waitForResponse(EventNames.err);
 
     await sendCommandResetPath(pubKey);
 
@@ -335,7 +335,7 @@ mixin ConnectionHelpers on Connection, ConnectionCommands, ConnectionResponses {
   }
 
   Future<void> reboot() async {
-    final err = waitForResponse(ResponseCodes.err);
+    final err = waitForResponse(EventNames.err);
 
     // assume device rebooted after a short delay
     final timeout = Future.delayed(const Duration(seconds: 1), () => null);
@@ -349,8 +349,8 @@ mixin ConnectionHelpers on Connection, ConnectionCommands, ConnectionResponses {
   }
 
   Future<dynamic> getBatteryVoltage() async {
-    final batteryVoltage = waitForResponse(ResponseCodes.batteryVoltage);
-    final err = waitForResponse(ResponseCodes.err);
+    final batteryVoltage = waitForResponse(EventNames.batteryVoltage);
+    final err = waitForResponse(EventNames.err);
 
     await sendCommandGetBatteryVoltage();
 
@@ -361,8 +361,8 @@ mixin ConnectionHelpers on Connection, ConnectionCommands, ConnectionResponses {
   }
 
   Future<dynamic> deviceQuery(int appTargetVer) async {
-    final deviceInfo = waitForResponse(ResponseCodes.deviceInfo);
-    final err = waitForResponse(ResponseCodes.err);
+    final deviceInfo = waitForResponse(EventNames.deviceInfo);
+    final err = waitForResponse(EventNames.err);
 
     await sendCommandDeviceQuery(appTargetVer);
 
@@ -373,9 +373,9 @@ mixin ConnectionHelpers on Connection, ConnectionCommands, ConnectionResponses {
   }
 
   Future<dynamic> exportPrivateKey() async {
-    final privateKey = waitForResponse(ResponseCodes.privateKey);
-    final err = waitForResponse(ResponseCodes.err);
-    final disabled = waitForResponse(ResponseCodes.disabled);
+    final privateKey = waitForResponse(EventNames.privateKey);
+    final err = waitForResponse(EventNames.err);
+    final disabled = waitForResponse(EventNames.disabled);
 
     await sendCommandExportPrivateKey();
 
@@ -387,9 +387,9 @@ mixin ConnectionHelpers on Connection, ConnectionCommands, ConnectionResponses {
   }
 
   Future<dynamic> importPrivateKey(Uint8List privateKey) async {
-    final ok = waitForResponse(ResponseCodes.ok);
-    final err = waitForResponse(ResponseCodes.err);
-    final disabled = waitForResponse(ResponseCodes.disabled);
+    final ok = waitForResponse(EventNames.ok);
+    final err = waitForResponse(EventNames.err);
+    final disabled = waitForResponse(EventNames.disabled);
 
     await sendCommandImportPrivateKey(privateKey);
 
@@ -402,9 +402,9 @@ mixin ConnectionHelpers on Connection, ConnectionCommands, ConnectionResponses {
 
   Future<dynamic> login(Uint8List contactPublicKey, String password, {Duration extraTimeout = const Duration(seconds: 1)}) async {
     final publicKeyPrefix = contactPublicKey.sublist(0, 6);
-    final sent = waitForResponse(ResponseCodes.sent);
-    final loginSuccess = waitForResponse(PushCodes.loginSuccess);
-    final err = waitForResponse(ResponseCodes.err);
+    final sent = waitForResponse(EventNames.sent);
+    final loginSuccess = waitForResponse(EventNames.loginSuccess);
+    final err = waitForResponse(EventNames.err);
 
     await sendCommandSendLogin(contactPublicKey, password);
 
@@ -431,9 +431,9 @@ mixin ConnectionHelpers on Connection, ConnectionCommands, ConnectionResponses {
 
   Future<dynamic> getStatus(Uint8List contactPublicKey, {Duration extraTimeout = const Duration(seconds: 1)}) async {
     final publicKeyPrefix = contactPublicKey.sublist(0, 6);
-    final sent = waitForResponse(ResponseCodes.sent);
-    final statusResponse = waitForResponse(PushCodes.statusResponse);
-    final err = waitForResponse(ResponseCodes.err);
+    final sent = waitForResponse(EventNames.sent);
+    final statusResponse = waitForResponse(EventNames.statusResponse);
+    final err = waitForResponse(EventNames.err);
 
     await sendCommandSendStatusReq(contactPublicKey);
 
@@ -475,9 +475,9 @@ mixin ConnectionHelpers on Connection, ConnectionCommands, ConnectionResponses {
 
   Future<dynamic> getTelemetry(Uint8List contactPublicKey, {Duration extraTimeout = const Duration(seconds: 1)}) async {
     final publicKeyPrefix = contactPublicKey.sublist(0, 6);
-    final sent = waitForResponse(ResponseCodes.sent);
-    final telemetryResponse = waitForResponse(PushCodes.telemetryResponse);
-    final err = waitForResponse(ResponseCodes.err);
+    final sent = waitForResponse(EventNames.sent);
+    final telemetryResponse = waitForResponse(EventNames.telemetryResponse);
+    final err = waitForResponse(EventNames.err);
 
     await sendCommandSendTelemetryReq(contactPublicKey);
 
@@ -500,9 +500,9 @@ mixin ConnectionHelpers on Connection, ConnectionCommands, ConnectionResponses {
   }
 
   Future<Uint8List?> sendBinaryRequest(Uint8List contactPublicKey, Uint8List requestCodeAndParams, {Duration extraTimeout = const Duration(seconds: 1)}) async {
-    final sent = waitForResponse(ResponseCodes.sent);
-    final binaryResponse = waitForResponse(PushCodes.binaryResponse);
-    final err = waitForResponse(ResponseCodes.err);
+    final sent = waitForResponse(EventNames.sent);
+    final binaryResponse = waitForResponse(EventNames.binaryResponse);
+    final err = waitForResponse(EventNames.err);
 
     await sendCommandSendBinaryReq(contactPublicKey, requestCodeAndParams);
 
@@ -543,7 +543,7 @@ mixin ConnectionHelpers on Connection, ConnectionCommands, ConnectionResponses {
       if (packet.payloadType != PayloadType.rawCustom) return;
       if (!BufferUtils.areBuffersEqual(packet.payload, rawBytes)) return;
 
-      off(PushCodes.logRxData, onLogRxData);
+      off(EventNames.logRxData, onLogRxData);
       if (!completer.isCompleted) {
         completer.complete({
           'rtt': duration,
@@ -553,16 +553,16 @@ mixin ConnectionHelpers on Connection, ConnectionCommands, ConnectionResponses {
       }
     }
 
-    on(PushCodes.logRxData, onLogRxData);
+    on(EventNames.logRxData, onLogRxData);
     
-    once(ResponseCodes.err, (_) {
-      off(PushCodes.logRxData, onLogRxData);
+    once(EventNames.err, (_) {
+      off(EventNames.logRxData, onLogRxData);
       if (!completer.isCompleted) completer.completeError(Exception('Error during ping'));
     });
 
     if (timeout != null) {
       Timer(timeout, () {
-        off(PushCodes.logRxData, onLogRxData);
+        off(EventNames.logRxData, onLogRxData);
         if (!completer.isCompleted) completer.completeError(TimeoutException('Ping timed out'));
       });
     }
@@ -572,8 +572,8 @@ mixin ConnectionHelpers on Connection, ConnectionCommands, ConnectionResponses {
   }
 
   Future<dynamic> getChannel(int channelIdx) async {
-    final channelInfo = waitForResponse(ResponseCodes.channelInfo);
-    final err = waitForResponse(ResponseCodes.err);
+    final channelInfo = waitForResponse(EventNames.channelInfo);
+    final err = waitForResponse(EventNames.err);
 
     await sendCommandGetChannel(channelIdx);
 
@@ -584,8 +584,8 @@ mixin ConnectionHelpers on Connection, ConnectionCommands, ConnectionResponses {
   }
 
   Future<void> setChannel(int channelIdx, String name, Uint8List secret) async {
-    final ok = waitForResponse(ResponseCodes.ok);
-    final err = waitForResponse(ResponseCodes.err);
+    final ok = waitForResponse(EventNames.ok);
+    final err = waitForResponse(EventNames.err);
 
     await sendCommandSetChannel(channelIdx, name, secret);
 
@@ -655,7 +655,7 @@ mixin ConnectionHelpers on Connection, ConnectionCommands, ConnectionResponses {
 
     void onSignStart(dynamic response) async {
       if (bufferReader.getRemainingBytesCount() > response['maxSignDataLen']) {
-        off(ResponseCodes.ok, onOk);
+        off(EventNames.ok, onOk);
         completer.completeError(Exception('data_too_long'));
         return;
       }
@@ -663,27 +663,27 @@ mixin ConnectionHelpers on Connection, ConnectionCommands, ConnectionResponses {
     }
 
     void onSignature(dynamic response) {
-      off(ResponseCodes.ok, onOk);
+      off(EventNames.ok, onOk);
       completer.complete(response['signature']);
     }
 
     void onErr(_) {
-      off(ResponseCodes.ok, onOk);
+      off(EventNames.ok, onOk);
       completer.completeError(Exception('Sign failed'));
     }
 
-    on(ResponseCodes.ok, onOk);
-    once(ResponseCodes.signStart, onSignStart);
-    once(ResponseCodes.signature, onSignature);
-    once(ResponseCodes.err, onErr);
+    on(EventNames.ok, onOk);
+    once(EventNames.signStart, onSignStart);
+    once(EventNames.signature, onSignature);
+    once(EventNames.err, onErr);
 
     await sendCommandSignStart();
     return await completer.future;
   }
 
   Future<void> setOtherParams(bool manualAddContacts) async {
-    final ok = waitForResponse(ResponseCodes.ok);
-    final err = waitForResponse(ResponseCodes.err);
+    final ok = waitForResponse(EventNames.ok);
+    final err = waitForResponse(EventNames.err);
 
     await sendCommandSetOtherParams(manualAddContacts ? 1 : 0);
 
@@ -712,13 +712,13 @@ mixin ConnectionHelpers on Connection, ConnectionCommands, ConnectionResponses {
 
     void cleanup() {
       timeoutTimer?.cancel();
-      if (onSent != null) off(ResponseCodes.sent, onSent);
-      if (onTraceData != null) off(PushCodes.traceData, onTraceData);
-      if (onErr != null) off(ResponseCodes.err, onErr);
+      if (onSent != null) off(EventNames.sent, onSent);
+      if (onTraceData != null) off(EventNames.traceData, onTraceData);
+      if (onErr != null) off(EventNames.err, onErr);
     }
 
     onSent = (response) {
-      off(ResponseCodes.err, onErr!);
+      off(EventNames.err, onErr!);
       
       final estTimeout = Duration(milliseconds: response['estTimeout']) + extraTimeout;
       timeoutTimer = Timer(estTimeout, () {
@@ -745,9 +745,9 @@ mixin ConnectionHelpers on Connection, ConnectionCommands, ConnectionResponses {
       }
     };
 
-    on(ResponseCodes.sent, onSent);
-    on(PushCodes.traceData, onTraceData);
-    once(ResponseCodes.err, onErr);
+    on(EventNames.sent, onSent);
+    on(EventNames.traceData, onTraceData);
+    once(EventNames.err, onErr);
 
     try {
       await sendCommandSendTracePath(tag, 0, path);

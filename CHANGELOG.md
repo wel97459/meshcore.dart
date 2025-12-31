@@ -1,3 +1,6 @@
+## 0.1.7
+- Added Event Names
+
 ## 0.1.6
 - Added pair to BLE
 

@@ -73,30 +73,30 @@ mixin ConnectionResponses on Connection {
   }
 
   void onAdvertPush(BufferReader bufferReader) {
-    emit(PushCodes.advert, {
+    emit(EventNames.advert, {
       'publicKey': bufferReader.readBytes(32),
     });
   }
 
   void onPathUpdatedPush(BufferReader bufferReader) {
-    emit(PushCodes.pathUpdated, {
+    emit(EventNames.pathUpdated, {
       'publicKey': bufferReader.readBytes(32),
     });
   }
 
   void onSendConfirmedPush(BufferReader bufferReader) {
-    emit(PushCodes.sendConfirmed, {
+    emit(EventNames.sendConfirmed, {
       'ackCode': bufferReader.readUInt32LE(),
       'roundTrip': bufferReader.readUInt32LE(),
     });
   }
 
   void onMsgWaitingPush(BufferReader bufferReader) {
-    emit(PushCodes.msgWaiting, {});
+    emit(EventNames.msgWaiting, {});
   }
 
   void onRawDataPush(BufferReader bufferReader) {
-    emit(PushCodes.rawData, {
+    emit(EventNames.rawData, {
       'lastSnr': bufferReader.readInt8() / 4,
       'lastRssi': bufferReader.readInt8(),
       'reserved': bufferReader.readByte(),
@@ -105,14 +105,14 @@ mixin ConnectionResponses on Connection {
   }
 
   void onLoginSuccessPush(BufferReader bufferReader) {
-    emit(PushCodes.loginSuccess, {
+    emit(EventNames.loginSuccess, {
       'reserved': bufferReader.readByte(),
       'pubKeyPrefix': bufferReader.readBytes(6),
     });
   }
 
   void onStatusResponsePush(BufferReader bufferReader) {
-    emit(PushCodes.statusResponse, {
+    emit(EventNames.statusResponse, {
       'reserved': bufferReader.readByte(),
       'pubKeyPrefix': bufferReader.readBytes(6),
       'statusData': bufferReader.readRemainingBytes(),
@@ -120,7 +120,7 @@ mixin ConnectionResponses on Connection {
   }
 
   void onLogRxDataPush(BufferReader bufferReader) {
-    emit(PushCodes.logRxData, {
+    emit(EventNames.logRxData, {
       'lastSnr': bufferReader.readInt8() / 4,
       'lastRssi': bufferReader.readInt8(),
       'raw': bufferReader.readRemainingBytes(),
@@ -128,7 +128,7 @@ mixin ConnectionResponses on Connection {
   }
 
   void onTelemetryResponsePush(BufferReader bufferReader) {
-    emit(PushCodes.telemetryResponse, {
+    emit(EventNames.telemetryResponse, {
       'reserved': bufferReader.readByte(),
       'pubKeyPrefix': bufferReader.readBytes(6),
       'lppSensorData': bufferReader.readRemainingBytes(),
@@ -136,7 +136,7 @@ mixin ConnectionResponses on Connection {
   }
 
   void onBinaryResponsePush(BufferReader bufferReader) {
-    emit(PushCodes.binaryResponse, {
+    emit(EventNames.binaryResponse, {
       'reserved': bufferReader.readByte(),
       'tag': bufferReader.readUInt32LE(),
       'responseData': bufferReader.readRemainingBytes(),
@@ -146,7 +146,7 @@ mixin ConnectionResponses on Connection {
   void onTraceDataPush(BufferReader bufferReader) {
     final reserved = bufferReader.readByte();
     final pathLen = bufferReader.readUInt8();
-    emit(PushCodes.traceData, {
+    emit(EventNames.traceData, {
       'reserved': reserved,
       'pathLen': pathLen,
       'flags': bufferReader.readUInt8(),
@@ -159,7 +159,7 @@ mixin ConnectionResponses on Connection {
   }
 
   void onNewAdvertPush(BufferReader bufferReader) {
-    emit(PushCodes.newAdvert, {
+    emit(EventNames.newAdvert, {
       'publicKey': bufferReader.readBytes(32),
       'type': bufferReader.readByte(),
       'flags': bufferReader.readByte(),
@@ -174,24 +174,24 @@ mixin ConnectionResponses on Connection {
   }
 
   void onOkResponse(BufferReader bufferReader) {
-    emit(ResponseCodes.ok, {});
+    emit(EventNames.ok, {});
   }
 
   void onErrResponse(BufferReader bufferReader) {
     final errCode = bufferReader.getRemainingBytesCount() > 0 ? bufferReader.readByte() : null;
-    emit(ResponseCodes.err, {
+    emit(EventNames.err, {
       'errCode': errCode,
     });
   }
 
   void onContactsStartResponse(BufferReader bufferReader) {
-    emit(ResponseCodes.contactsStart, {
+    emit(EventNames.contactsStart, {
       'count': bufferReader.readUInt32LE(),
     });
   }
 
   void onContactResponse(BufferReader bufferReader) {
-    emit(ResponseCodes.contact, {
+    emit(EventNames.contact, {
       'publicKey': bufferReader.readBytes(32),
       'type': bufferReader.readByte(),
       'flags': bufferReader.readByte(),
@@ -206,13 +206,13 @@ mixin ConnectionResponses on Connection {
   }
 
   void onEndOfContactsResponse(BufferReader bufferReader) {
-    emit(ResponseCodes.endOfContacts, {
+    emit(EventNames.endOfContacts, {
       'mostRecentLastmod': bufferReader.readUInt32LE(),
     });
   }
 
   void onSentResponse(BufferReader bufferReader) {
-    emit(ResponseCodes.sent, {
+    emit(EventNames.sent, {
       'result': bufferReader.readInt8(),
       'expectedAckCrc': bufferReader.readUInt32LE(),
       'estTimeout': bufferReader.readUInt32LE(),
@@ -220,19 +220,19 @@ mixin ConnectionResponses on Connection {
   }
 
   void onExportContactResponse(BufferReader bufferReader) {
-    emit(ResponseCodes.exportContact, {
+    emit(EventNames.exportContact, {
       'advertPacketBytes': bufferReader.readRemainingBytes(),
     });
   }
 
   void onBatteryVoltageResponse(BufferReader bufferReader) {
-    emit(ResponseCodes.batteryVoltage, {
+    emit(EventNames.batteryVoltage, {
       'batteryMilliVolts': bufferReader.readUInt16LE(),
     });
   }
 
   void onDeviceInfoResponse(BufferReader bufferReader) {
-    emit(ResponseCodes.deviceInfo, {
+    emit(EventNames.deviceInfo, {
       'firmwareVer': bufferReader.readInt8(),
       'reserved': bufferReader.readBytes(6),
       'firmware_build_date': bufferReader.readCString(12),
@@ -241,13 +241,13 @@ mixin ConnectionResponses on Connection {
   }
 
   void onPrivateKeyResponse(BufferReader bufferReader) {
-    emit(ResponseCodes.privateKey, {
+    emit(EventNames.privateKey, {
       'privateKey': bufferReader.readBytes(64),
     });
   }
 
   void onDisabledResponse(BufferReader bufferReader) {
-    emit(ResponseCodes.disabled, {});
+    emit(EventNames.disabled, {});
   }
 
   void onChannelInfoResponse(BufferReader bufferReader) {
@@ -256,7 +256,7 @@ mixin ConnectionResponses on Connection {
     final remainingBytesLength = bufferReader.getRemainingBytesCount();
 
     if (remainingBytesLength == 16) {
-      emit(ResponseCodes.channelInfo, {
+      emit(EventNames.channelInfo, {
         'channelIdx': idx,
         'name': name,
         'secret': bufferReader.readBytes(remainingBytesLength),
@@ -267,20 +267,20 @@ mixin ConnectionResponses on Connection {
   }
 
   void onSignStartResponse(BufferReader bufferReader) {
-    emit(ResponseCodes.signStart, {
+    emit(EventNames.signStart, {
       'reserved': bufferReader.readByte(),
       'maxSignDataLen': bufferReader.readUInt32LE(),
     });
   }
 
   void onSignatureResponse(BufferReader bufferReader) {
-    emit(ResponseCodes.signature, {
+    emit(EventNames.signature, {
       'signature': bufferReader.readBytes(64),
     });
   }
 
   void onSelfInfoResponse(BufferReader bufferReader) {
-    emit(ResponseCodes.selfInfo, {
+    emit(EventNames.selfInfo, {
       'type': bufferReader.readByte(),
       'txPower': bufferReader.readByte(),
       'maxTxPower': bufferReader.readByte(),
@@ -298,17 +298,17 @@ mixin ConnectionResponses on Connection {
   }
 
   void onCurrTimeResponse(BufferReader bufferReader) {
-    emit(ResponseCodes.currTime, {
+    emit(EventNames.currTime, {
       'epochSecs': bufferReader.readUInt32LE(),
     });
   }
 
   void onNoMoreMessagesResponse(BufferReader bufferReader) {
-    emit(ResponseCodes.noMoreMessages, {});
+    emit(EventNames.noMoreMessages, {});
   }
 
   void onContactMsgRecvResponse(BufferReader bufferReader) {
-    emit(ResponseCodes.contactMsgRecv, {
+    emit(EventNames.contactMsgRecv, {
       'pubKeyPrefix': bufferReader.readBytes(6),
       'pathLen': bufferReader.readByte(),
       'txtType': bufferReader.readByte(),
@@ -318,7 +318,7 @@ mixin ConnectionResponses on Connection {
   }
 
   void onChannelMsgRecvResponse(BufferReader bufferReader) {
-    emit(ResponseCodes.channelMsgRecv, {
+    emit(EventNames.channelMsgRecv, {
       'channelIdx': bufferReader.readInt8(),
       'pathLen': bufferReader.readByte(),
       'txtType': bufferReader.readByte(),
