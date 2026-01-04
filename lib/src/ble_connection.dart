@@ -32,8 +32,8 @@ class BleConnection extends Connection
   @override
   Future<void> connect() async {
     try {
-      final paired = await ble.isPaired(deviceId);
-      if (!paired) {
+        final paired = await ble.isPaired(deviceId);
+        if (!paired) {
         await ble.pair(deviceId);
       }
       await ble.connect(deviceId);
@@ -88,7 +88,7 @@ class BleConnection extends Connection
 
   @override
   Future<void> sendToRadioFrame(Uint8List data) async {
-    emit('tx', data);
+    emit(EventNames.tx, data);
     await ble.write(
       deviceId,
       BleUuids.serviceUuid,

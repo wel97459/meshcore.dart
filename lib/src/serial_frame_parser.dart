@@ -3,20 +3,19 @@ import 'dart:typed_data';
 import 'constants.dart';
 
 class SerialFrameParser extends StreamTransformerBase<Uint8List, Uint8List> {
-  final List<int> _buffer = [];
-
   @override
   Stream<Uint8List> bind(Stream<Uint8List> stream) {
     final controller = StreamController<Uint8List>(sync: true);
-    
+    final List<int> buffer = [];
+
     stream.listen(
       (data) {
-        _buffer.addAll(data);
-        _processBuffer(controller);
+        buffer.addAll(data);
+        _processBuffer(controller, buffer);
       },
       onError: controller.addError,
       onDone: () {
-        _processBuffer(controller);
+        _processBuffer(controller, buffer);
         controller.close();
       },
       cancelOnError: false,
@@ -25,38 +24,47 @@ class SerialFrameParser extends StreamTransformerBase<Uint8List, Uint8List> {
     return controller.stream;
   }
 
-  void _processBuffer(StreamController<Uint8List> controller) {
+  void _processBuffer(StreamController<Uint8List> controller, List<int> buffer) {
     const frameHeaderLength = 3;
     
-    while (_buffer.length >= frameHeaderLength) {
-      final frameType = _buffer[0];
+    int offset = 0;
+    while (buffer.length - offset >= frameHeaderLength) {
+      final frameType = buffer[offset];
       
       // Check if frame type is supported
       if (frameType != SerialFrameTypes.incoming && frameType != SerialFrameTypes.outgoing) {
-        _buffer.removeAt(0);
+        offset++;
         continue;
       }
 
       // Extract length (little endian)
-      final length = _buffer[1] | (_buffer[2] << 8);
+      final length = buffer[offset + 1] | (buffer[offset + 2] << 8);
       
       if (length == 0) {
         // Invalid length, skip header and try again
-        _buffer.removeRange(0, frameHeaderLength);
+        offset += frameHeaderLength;
         continue;
       }
 
       final requiredLength = frameHeaderLength + length;
-      if (_buffer.length < requiredLength) {
+      if (buffer.length - offset < requiredLength) {
         // Wait for more data
         break;
       }
 
       // Extract frame data
-      final frameData = Uint8List.fromList(_buffer.sublist(frameHeaderLength, requiredLength));
-      _buffer.removeRange(0, requiredLength);
+      final frameData = Uint8List.fromList(buffer.sublist(offset + frameHeaderLength, offset + requiredLength));
+      offset += requiredLength;
       
       controller.add(frameData);
+    }
+
+    if (offset > 0) {
+      if (offset >= buffer.length) {
+        buffer.clear();
+      } else {
+        buffer.removeRange(0, offset);
+      }
     }
   }
 }

@@ -1,3 +1,6 @@
+## 0.2.0
+- Fixed problem with incoming serial data. Software flow control was turned on this removed btyes 0x11 and 0x13 from the incoming data.
+
 ## 0.1.7
 - Added Event Names
 

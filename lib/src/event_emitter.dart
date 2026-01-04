@@ -27,6 +27,7 @@ abstract class EventEmitter {
   }
 
   void emit(dynamic event, [dynamic data]) {
+    //print('Emitting event: $event');
     if (_listeners.containsKey(event)) {
       final callbacks = List<Function(dynamic)>.from(_listeners[event]!);
       for (final callback in callbacks) {

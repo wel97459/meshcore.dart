@@ -24,6 +24,7 @@ class LibSerialPortWrapper implements SerialPortWrapper {
     // Default configuration for MeshCore devices
     final config = SerialPortConfig();
     config.baudRate = 115200;
+    config.xonXoff = SerialPortXonXoff.disabled; // Disable software flow control (XON/XOFF)
     
     try {
       if (_port.openReadWrite()) {

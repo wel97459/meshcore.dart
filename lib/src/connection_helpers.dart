@@ -100,6 +100,11 @@ mixin ConnectionHelpers on Connection, ConnectionCommands, ConnectionResponses {
       completer.complete(contacts);
     });
 
+    // once(EventNames.contactsStart, (numberContacts) {
+    //   off(EventNames.contactsStart, (_) {});
+    // print('Number of contacts to retrieve: ${numberContacts['count']}');
+    // });
+
     try {
       await sendCommandGetContacts();
     } catch (e) {

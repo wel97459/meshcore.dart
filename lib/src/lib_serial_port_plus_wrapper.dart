@@ -30,6 +30,7 @@ class LibSerialPortPlusWrapper implements SerialPortWrapper {
         bits: 8,
         parity: SerialPortParity.none,
         stopBits: 1,
+        xonXoff: SerialPortXonXoff.disabled,
       );
       _port!.setConfig(config);
 
@@ -89,8 +90,4 @@ class LibSerialPortPlusWrapper implements SerialPortWrapper {
 
   @override
   bool get isOpen => _isOpen;
-
-  static List<String> listAvailablePorts() {
-    return SerialPort.getAvailablePorts();
-  }
 }
